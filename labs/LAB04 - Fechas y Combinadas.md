@@ -23,7 +23,10 @@ Escribe una consulta que devuelva el sueldo medio por departamento para departam
 
 Solución:
 ```sql
-
+select dpto,avg(sueldo) as sueldo_medio 
+from empleado 
+group by dpto
+having count (*) > 1;
 ```
 
 Resultado:
@@ -242,7 +245,9 @@ Escribe una consulta para obtener el nombre, apellido1 y fechaNac de los emplead
 
 Solución:
 ```sql
-
+select nombre , apellido1,fechaNac 
+from empleado
+where CAST(strftime('%Y', '2025-01-01') AS INTEGER) - CAST(strftime('%Y', fechaNac) AS INTEGER) between 60 and 70;
 ```
 
 Tabla resultado:
@@ -519,7 +524,11 @@ Escribe una consulta que devuelva los empleados con más de un familiar que no s
 
 Solución:
 ```sql
-
+select empleado from familiar
+group by empleado
+having count (*) > 1
+Except
+select supervisor from empleado where supervisor is not null
 ```
 
 Tabla resultado:
@@ -649,7 +658,14 @@ Escribe una consulta que devuelva el dni de los empleados que no tienen familiar
 
 Solución:
 ```sql
-
+select dni from empleado
+Except 
+select empleado from familiar
+Union
+select supervisor from empleado
+where supervisor is not null
+group by supervisor
+having count(*) > 2
 
 ```
 
@@ -770,6 +786,17 @@ Escribe una consulta que devuelva los proyectos del departamento con mayor núme
 
 Solución:
 ```sql
+WITH dpto_ganador AS (
+  SELECT dpto, COUNT(*) as total_empleados
+  FROM empleado
+  GROUP BY dpto
+  ORDER BY total_empleados DESC
+  LIMIT 1
+)
+SELECT nombre, ubicacion, dpto
+FROM PROYECTO
+WHERE dpto = (SELECT dpto FROM dpto_ganador);
+
 
 ```
 
